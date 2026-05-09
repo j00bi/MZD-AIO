@@ -1,6 +1,5 @@
-/* jshint esversion:6, -W117 */
-// Display a notification message when a new version is ready for install
-var dll = null
+/* jshint esversion:6 */
+let dll = null
 ipc.on('update-not available', (event) => {
   setTimeout(function () {
     $('#update-available a').addClass('w3-hide')
@@ -8,7 +7,7 @@ ipc.on('update-not available', (event) => {
 })
 ipc.on('update-available-alert', (event) => {
   $('#update-available, #update-available a').removeClass('w3-hide')
-  var updots = 0
+  let updots = 0
   dll = setInterval(function () {
     if (updots !== 5) {
       $('#update-available a').append('.')
@@ -29,7 +28,6 @@ ipc.on('update-downloaded', (event) => {
   snackbarstay(`<span id="restart">An Update Is Available:  <a href="" class="w3-btn w3-deep-purple w3-hover-light-blue">UPDATE</a></span>`)
   $('#update-available').text('Update Available')
   setTimeout(function () { document.getElementById('update-ready').className = '' }, 7500)
-  // showNotification('Update', 'An updated application package will be installed on next restart, <a id="restart" href="">click here to update now</a>.', 30, function () { ipc.send('update-and-restart') })
   document.getElementById('restart').addEventListener('click', (e) => {
     e.preventDefault()
     ipc.send('update-and-restart')
@@ -38,42 +36,51 @@ ipc.on('update-downloaded', (event) => {
 ipc.on('dl-progress', (event, megaBytes, fileName, totalSize) => {
   if ((megaBytes / totalSize) < 1) {
     if ($('#progress').length) {
-      // document.getElementById('progress').innerHTML = '<div class="w3-progress-container"><div id="progBar" class="w3-progressbar w3-green" style="width:' + parseInt((megaBytes / totalSize) * 100) + '%"><span class="w3-center w3-text-black color-progress">' + megaBytes.toFixed(2) + 'MB | ' + parseInt((megaBytes / totalSize) * 100) + '%</span></div>'
     } else {
       showNotification('Downloading Please wait <img src="./files/img/load-1.gif" alt="...">', `<div id="dl-notif"><h5>Downloading ${fileName}: </h5><span id="progress"></span></div>`, 0)
     }
   } else {
-    document.getElementById('progress').innerHTML = `${fileName} Download Complete.`
+    let el = document.getElementById('progress')
+    if (el) el.textContent = `${fileName} Download Complete.`
     snackbar(`${fileName} Download Complete.`)
     $('#progress').parent().fadeOut('1000')
   }
 })
 ipc.on('notif-progress', (event, message) => {
   if ($('#progress').length) {
-    document.getElementById('dl-notif').innerHTML = message
+    let el = document.getElementById('dl-notif')
+    if (el) el.textContent = message
     $('#dl-notif').parent().hide(1000)
     snackbar(message)
   } else {
-    showNotification('Download', `<div id="dl-notif">${message}</div>`, 10)
+    showNotification('Download', message, 10)
   }
 })
 ipc.on('notif-bg-saved', (event, message) => {
-  showNotification('Background', `<div id="dl-notif">${message}</div>`, 10)
+  showNotification('Background', message, 10)
 })
 
 function showNotification (title, message, fadeouttime, callback) {
   $('#notices').show()
-  var notice = document.createElement('div')
+  let notice = document.createElement('div')
   notice.setAttribute('class', 'notice')
-  notice.innerHTML = `<span class="w3-closebtn w3-display-topright" onclick="$(this).parent().hide((${fadeouttime}+1)*1000)">&times;</span><div class="w3-hover-text-indigo">${message}</div>`
+  let closeBtn = document.createElement('span')
+  closeBtn.className = 'w3-closebtn w3-display-topright'
+  closeBtn.style.cursor = 'pointer'
+  closeBtn.textContent = '\u00D7'
+  closeBtn.onclick = function () { $(this).parent().hide((fadeouttime + 1) * 1000) }
+  notice.appendChild(closeBtn)
+  let contentDiv = document.createElement('div')
+  contentDiv.className = 'w3-hover-text-indigo'
+  contentDiv.textContent = message ? String(message).replace(/<[^>]+>/gm, '') : ''
+  notice.appendChild(contentDiv)
   document.getElementById('notices').appendChild(notice)
   if (fadeouttime !== 0) {
     setTimeout(function () {
       $('#notices *').fadeOut(fadeouttime * 1000)
     }, 3000)
   }
-  // document.body.appendChild(notice)
-  var nohtml = message ? String(message).replace(/<[^>]+>/gm, '') : ''
+  let nohtml = message ? String(message).replace(/<[^>]+>/gm, '') : ''
   snackbar(`<img src='icon.ico' onerror='$(this).hide()'> ${nohtml}`)
   let myNotification = new Notification(title, {
     body: nohtml,
@@ -92,16 +99,12 @@ function showNotification (title, message, fadeouttime, callback) {
     }
   }
 }
+
 ipc.on('snackbar-msg', (event, message) => {
   snackbar(message)
 })
 
 function snackbar (message, mtime) {
-  /* $('#snackbar').append('body')
-  var x = document.getElementById('snackbar')
-  x.innerHTML = message
-  x.className = 'show w3-card-12'
-  setTimeout(function () { x.className = x.className.replace('show', '') }, 1500) */
   $.gritter.add({
     title: 'MZD-AIO',
     text: message,
@@ -110,10 +113,6 @@ function snackbar (message, mtime) {
 }
 
 function snackbarstay (message) {
-  // $('#snackbar').append('body')
-  // var x = document.getElementById('snackbar')
-  // x.innerHTML = message + '<div onclick="$(this).parent().removeClass(\'stay\')" class="w3-xxlarge w3-display-topright w3-close-btn w3-hover-text-red" style="margin-top:-15px;cursor:pointer;">&times;</div>'
-  // x.className = 'stay w3-card-12'
   $.gritter.add({
     title: 'MZD-AIO',
     text: message,

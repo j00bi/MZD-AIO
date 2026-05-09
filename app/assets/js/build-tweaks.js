@@ -1557,7 +1557,7 @@ function addWifiAP (user) {
             }
           })
         } else {
-          fs.writeFileSync(`${tmpdir}/*-start-wifiAP/wifiAP.config`, result + '\n')
+          fs.writeFileSync(`${tmpdir}/02-start-wifiAP/wifiAP.config`, result + '\n')
           serialCheck(user)
         }
       }
