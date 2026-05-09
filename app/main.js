@@ -123,6 +123,7 @@ function initialize () {
         'nodeIntegration': true,
         'contextIsolation': false,
         'enableRemoteModule': true,
+        'webSecurity': false,
         'nodeIntegrationInSubFrames': false,
         'preload': path.resolve(path.join(__dirname, 'preload.js'))
       }
@@ -304,6 +305,7 @@ function initialize () {
         'nodeIntegration': true,
         'contextIsolation': false,
         'enableRemoteModule': true,
+        'webSecurity': false,
         'preload': path.resolve(path.join(__dirname, 'preload.js'))
       }
     })
