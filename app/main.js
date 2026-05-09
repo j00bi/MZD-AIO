@@ -9,7 +9,8 @@ const Tray = electron.Tray
 const ipc = electron.ipcMain
 const nativeImage = electron.nativeImage
 
-require('@electron/remote/main').initialize()
+const safeRemote = require('@electron/remote/main')
+safeRemote.initialize()
 
 process.on('uncaughtException', (e) => {
   console.error(`Caught unhandled exception: ${e}`)
@@ -127,6 +128,7 @@ function initialize () {
       }
     })
     mainWindowState.manage(win)
+    safeRemote.enable(win.webContents)
     win.loadURL(`file://${__dirname}/${pjson.config.url}`)
     win.on('closed', onClosed)
     win.on('unresponsive', function () {
@@ -305,6 +307,7 @@ function initialize () {
         'preload': path.resolve(path.join(__dirname, 'preload.js'))
       }
     })
+    safeRemote.enable(imageJoin.webContents)
     imageJoin.loadURL(`file://${__dirname}/views/joiner.html#joiner`)
     imageJoin.on('did-finish-load', () => {})
     ipc.on('bg-prev', () => {
